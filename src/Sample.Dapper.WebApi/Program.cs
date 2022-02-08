@@ -1,5 +1,3 @@
-using System.Reflection;
-using DapperExtensions;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Sample.Dapper.Persistence.Entities;
 using Sample.Dapper.Persistence.Interfaces;

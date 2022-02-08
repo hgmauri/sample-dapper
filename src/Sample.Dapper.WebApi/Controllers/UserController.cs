@@ -1,5 +1,3 @@
-using DapperExtensions;
-using DapperExtensions.Predicate;
 using Sample.Dapper.Persistence.Entities;
 using Sample.Dapper.Persistence.Interfaces;
 
@@ -30,11 +28,10 @@ public class UserController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("GetByPredicate")]
-    public Task<IActionResult> GetByPredicate([FromQuery] int id)
+    [HttpGet("GetListPaged")]
+    public async Task<IActionResult> GetListPaged(int pageNumber, int rowPerPages, string conditions, string orderby)
     {
-        var predicate = Predicates.Field<User>(f => f.EntityId, Operator.Eq, id);
-        var list = _repository.GetByPredicate(predicate);
-        return Task.FromResult<IActionResult>(Ok(list));
+        var list = await _repository.GetListPaged(pageNumber, rowPerPages, conditions, orderby);
+        return Ok(list);
     }
 }
