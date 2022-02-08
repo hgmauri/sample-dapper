@@ -28,10 +28,18 @@ public class UserController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("GetListPaged")]
+
+    [HttpGet("GetPaged")]
     public async Task<IActionResult> GetListPaged(int pageNumber, int rowPerPages, string conditions, string orderby)
     {
         var list = await _repository.GetListPaged(pageNumber, rowPerPages, conditions, orderby);
         return Ok(list);
+    }
+
+    [HttpDelete("Delete")]
+    public async Task<IActionResult> Delete([FromQuery] int id)
+    {
+        await _repository.DeleteAsync(id);
+        return Ok();
     }
 }
