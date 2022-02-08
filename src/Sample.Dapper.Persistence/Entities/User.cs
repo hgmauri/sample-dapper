@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using DapperExtensions.Mapper;
 
 namespace Sample.Dapper.Persistence.Entities;
 

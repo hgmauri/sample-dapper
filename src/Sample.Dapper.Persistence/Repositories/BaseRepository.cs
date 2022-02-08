@@ -23,23 +23,28 @@ public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where T
         PageLimit = 1000;
     }
 
-    public long Add(TEntity entity)
+    public async Task<long> Add(TEntity entity)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.Insert(entity);
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = connection.Insert(entity);
+        await connection.CloseAsync();
+        return result;
     }
 
-    public void Delete(int id)
+    public async Task Delete(int id)
     {
-        using var connection = new SqlConnection(ConnectionString);
+        await using var connection = new SqlConnection(ConnectionString);
         var entity = connection.Get<TEntity>(id);
         connection.Delete(entity);
+        await connection.CloseAsync();
     }
 
-    public bool Update(TEntity entity)
+    public async Task<bool> Update(TEntity entity)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.Update(entity);
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = connection.Update(entity);
+        await connection.CloseAsync();
+        return result;
     }
 
     public void SetPageOffset(int pageOffset)
@@ -70,56 +75,70 @@ public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where T
         PageLimit = pageLimit;
     }
 
-    public TEntity Get(int id)
+    public async Task<TEntity> Get(int id)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.Get<TEntity>(id);
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = await connection.GetAsync<TEntity>(id);
+        await connection.CloseAsync();
+        return result;
     }
 
-    public IEnumerable<TEntity> Get(IEnumerable<int> entityIds)
+    public async Task<IEnumerable<TEntity>> Get(IEnumerable<int> entityIds)
     {
         var predicateGroup = new PredicateGroup
         {
             Operator = GroupOperator.Or,
             Predicates = entityIds.Select(e => { return Predicates.Field<TEntity>(dp => dp.EntityId, Operator.Eq, e); }).ToList<IPredicate>()
         };
-        return GetByPredicate(predicateGroup);
+        return await GetByPredicate(predicateGroup);
     }
 
-    public TEntity Get(long id)
+    public async Task<TEntity> Get(long id)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.Get<TEntity>(id);
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = connection.Get<TEntity>(id);
+        await connection.CloseAsync();
+        return result;
     }
 
-    public IEnumerable<TEntity> GetByPredicate(IFieldPredicate predicate)
+    public async Task<IEnumerable<TEntity>> GetByPredicate(IFieldPredicate predicate)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.GetPage<TEntity>(predicate, PageSort, PageOffset, PageLimit).ToList();
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = connection.GetPage<TEntity>(predicate, PageSort, PageOffset, PageLimit).ToList();
+        await connection.CloseAsync();
+        return result;
     }
 
-    public IEnumerable<TEntity> GetByPredicate(IPredicateGroup predicateGroup)
+    public async Task<IEnumerable<TEntity>> GetByPredicate(IPredicateGroup predicateGroup)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.GetPage<TEntity>(predicateGroup, PageSort, PageOffset, PageLimit).ToList();
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = connection.GetPage<TEntity>(predicateGroup, PageSort, PageOffset, PageLimit).ToList();
+        await connection.CloseAsync();
+        return result;
     }
 
-    public IEnumerable<TEntity> GetAll()
+    public async Task<IEnumerable<TEntity>> GetAll()
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.GetPage<TEntity>(null, PageSort, PageOffset, PageLimit).ToList();
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = connection.GetPage<TEntity>(null, PageSort, PageOffset, PageLimit).ToList();
+        await connection.CloseAsync();
+        return result;
     }
 
-    public long Count(IFieldPredicate predicate)
+    public async Task<long> Count(IFieldPredicate predicate)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.Count<TEntity>(predicate);
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = connection.Count<TEntity>(predicate);
+        await connection.CloseAsync();
+        return result;
     }
 
-    public long CountByPredicateGroup(IPredicateGroup predicateGroup)
+    public async Task<long> CountByPredicateGroup(IPredicateGroup predicateGroup)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.Count<TEntity>(predicateGroup);
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = connection.Count<TEntity>(predicateGroup);
+        await connection.CloseAsync();
+        return result;
     }
 
     public virtual async Task<long> AddAsync(TEntity entity)
@@ -169,30 +188,38 @@ public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where T
 
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await Task.Run(GetAll, cancellationToken).ConfigureAwait(false);
+        return await Task.Run(() => GetAll(), cancellationToken).ConfigureAwait(false);
     }
 
-    public TEntity ExecuteSingle(string query, object? parameters = null)
+    public async Task<TEntity> ExecuteSingle(string query, object? parameters = null)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.QuerySingle<TEntity>(query, parameters, commandType: CommandType.Text);
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = connection.QuerySingle<TEntity>(query, parameters, commandType: CommandType.Text);
+        await connection.CloseAsync();
+        return result;
     }
 
-    public TEntity ExecuteSingleOrDefault(string query, object? parameters = null)
+    public async Task<TEntity> ExecuteSingleOrDefault(string query, object? parameters = null)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.QuerySingleOrDefault<TEntity>(query, parameters, commandType: CommandType.Text);
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = connection.QuerySingleOrDefault<TEntity>(query, parameters, commandType: CommandType.Text);
+        await connection.CloseAsync();
+        return result;
     }
 
-    public IEnumerable<TEntity> Execute(string query, object? parameters = null, CommandType commandType = CommandType.Text, int commandTimeOut = 60)
+    public async Task<IEnumerable<TEntity>> Execute(string query, object? parameters = null, CommandType commandType = CommandType.Text, int commandTimeOut = 60)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.Query<TEntity>(query, parameters, commandType: commandType, commandTimeout: commandTimeOut);
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = connection.Query<TEntity>(query, parameters, commandType: commandType, commandTimeout: commandTimeOut);
+        await connection.CloseAsync();
+        return result;
     }
 
-    public T ExecuteSingle<T>(string query, object? parameters = null, CommandType commandType = CommandType.Text, int commandTimeOut = 60)
+    public async Task<T> ExecuteSingle<T>(string query, object? parameters = null, CommandType commandType = CommandType.Text, int commandTimeOut = 60)
     {
-        using var connection = new SqlConnection(ConnectionString);
-        return connection.QuerySingle<T>(query, parameters, commandType: commandType, commandTimeout: commandTimeOut);
+        await using var connection = new SqlConnection(ConnectionString);
+        var result = connection.QuerySingle<T>(query, parameters, commandType: commandType, commandTimeout: commandTimeOut);
+        await connection.CloseAsync();
+        return result;
     }
 }

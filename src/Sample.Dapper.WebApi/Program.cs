@@ -1,3 +1,7 @@
+using System.Reflection;
+using DapperExtensions;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Sample.Dapper.Persistence.Entities;
 using Sample.Dapper.Persistence.Interfaces;
 using Sample.Dapper.Persistence.Repositories;
 using Sample.Dapper.WebApi.Core.Extensions;
@@ -22,6 +26,8 @@ try
     {
         return new UserRepository(builder.Configuration.GetConnectionString("DefaultConnection"));
     });
+    builder.Services.AddSingleton<DatabaseExtensions>();
+    builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IStartupFilter, MigrationManager>());
 
     var app = builder.Build();
 
