@@ -1,43 +1,35 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Sample.Dapper.Persistence.Entities;
 using Sample.Dapper.Persistence.Interfaces;
 using Sample.Dapper.Persistence.Repositories;
 using Sample.Dapper.WebApi.Core.Extensions;
 using Serilog;
 
-SerilogExtensions.AddSerilog("API Sample Dapper");
-
 try
 {
-    var builder = WebApplication.CreateBuilder(args);
-    builder.Host.UseSerilog(Log.Logger);
+	var builder = WebApplication.CreateBuilder(args);
+	builder.AddSerilog("API Dapper");
 
-    builder.Services.AddRouting(options => options.LowercaseUrls = true);
+	builder.Services.AddRouting(options => options.LowercaseUrls = true);
+	builder.Services.AddControllers();
+	builder.Services.AddEndpointsApiExplorer();
+	builder.Services.AddSwaggerGen();
 
-    builder.Services.AddControllers();
-    builder.Services.AddSwaggerGen(c =>
-    {
-        c.SwaggerDoc("v1", new() { Title = "Sample.Dapper.WebApi", Version = "v1" });
-    });
+	builder.Services.AddScoped<IUserRepository, UserRepository>(_ => new UserRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
+	builder.Services.AddSingleton<DatabaseExtensions>();
+	builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IStartupFilter, MigrationManager>());
 
-    builder.Services.AddScoped<IUserRepository, UserRepository>(_ =>
-    {
-        return new UserRepository(builder.Configuration.GetConnectionString("DefaultConnection"));
-    });
-    builder.Services.AddSingleton<DatabaseExtensions>();
-    builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IStartupFilter, MigrationManager>());
+	var app = builder.Build();
 
-    var app = builder.Build();
+	if (app.Environment.IsDevelopment())
+	{
+		app.UseSwagger();
+		app.UseSwaggerUI();
+	}
 
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sample.Dapper.WebApi v1"));
-    }
+	app.UseAuthorization();
+	app.MapControllers();
 
-    app.MapControllers();
-
-    await app.RunAsync();
+	await app.RunAsync();
 }
 catch (Exception ex)
 {

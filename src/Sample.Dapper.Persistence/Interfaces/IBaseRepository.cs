@@ -23,8 +23,8 @@ public interface IBaseRepository<TEntity> where TEntity : BaseEntity
     Task<TEntity> GetAsync(int id, CancellationToken cancellationToken);
     Task<IEnumerable<TEntity>> GetAllAsync();
     Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken);
-    Task<TEntity> ExecuteSingle(string query, object? parameters = null);
-    Task<T> ExecuteSingle<T>(string query, object? parameters = null, CommandType commandType = CommandType.Text, int commandTimeOut = 60);
-    Task<TEntity> ExecuteSingleOrDefault(string query, object? parameters = null);
-    Task<IEnumerable<TEntity>> Execute(string query, object? parameters = null, CommandType commandType = CommandType.Text, int commandTimeOut = 60);
+    Task<TEntity> ExecuteSingle(string query, object parameters = null);
+    Task<T> ExecuteSingle<T>(string query, object parameters = null, CommandType commandType = CommandType.Text, int commandTimeOut = 60);
+    Task<TEntity> ExecuteSingleOrDefault(string query, object parameters = null);
+    Task<IEnumerable<TEntity>> Execute(string query, object parameters = null, CommandType commandType = CommandType.Text, int commandTimeOut = 60);
 }

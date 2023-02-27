@@ -129,7 +129,7 @@ public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where T
         return await Task.Run(GetAll, cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<TEntity> ExecuteSingle(string query, object? parameters = null)
+    public async Task<TEntity> ExecuteSingle(string query, object parameters = null)
     {
         await using var connection = new SqlConnection(ConnectionString);
         var result = connection.QuerySingle<TEntity>(query, parameters, commandType: CommandType.Text);
@@ -137,7 +137,7 @@ public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where T
         return result;
     }
 
-    public async Task<TEntity> ExecuteSingleOrDefault(string query, object? parameters = null)
+    public async Task<TEntity> ExecuteSingleOrDefault(string query, object parameters = null)
     {
         await using var connection = new SqlConnection(ConnectionString);
         var result = connection.QuerySingleOrDefault<TEntity>(query, parameters, commandType: CommandType.Text);
@@ -145,7 +145,7 @@ public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where T
         return result;
     }
 
-    public async Task<IEnumerable<TEntity>> Execute(string query, object? parameters = null, CommandType commandType = CommandType.Text, int commandTimeOut = 60)
+    public async Task<IEnumerable<TEntity>> Execute(string query, object parameters = null, CommandType commandType = CommandType.Text, int commandTimeOut = 60)
     {
         await using var connection = new SqlConnection(ConnectionString);
         var result = connection.Query<TEntity>(query, parameters, commandType: commandType, commandTimeout: commandTimeOut);
@@ -153,7 +153,7 @@ public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity> where T
         return result;
     }
 
-    public async Task<T> ExecuteSingle<T>(string query, object? parameters = null, CommandType commandType = CommandType.Text, int commandTimeOut = 60)
+    public async Task<T> ExecuteSingle<T>(string query, object parameters = null, CommandType commandType = CommandType.Text, int commandTimeOut = 60)
     {
         await using var connection = new SqlConnection(ConnectionString);
         var result = connection.QuerySingle<T>(query, parameters, commandType: commandType, commandTimeout: commandTimeOut);
